@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HyperCream Visualizer Example</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #000;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        #visualizer-canvas {
+            border: 1px solid #333;
+            display: block;
+            margin: 20px auto;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        audio {
+            margin: 10px;
+        }
+        
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #555;
+        }
+        
+        .info {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>HyperCream Visualizer</h1>
+        
+        <canvas id="visualizer-canvas" width="800" height="600"></canvas>
+        
+        <div class="controls">
+            <audio id="audio-player" controls>
+                <source src="https://www.soundjay.com/misc/beep-07a.wav" type="audio/wav">
+                Your browser does not support the audio element.
+            </audio>
+            <br>
+            <button onclick="startVisualizer()">Start Visualizer</button>
+            <button onclick="stopVisualizer()">Stop Visualizer</button>
+            <button onclick="generateTestTone()">Generate Test Tone</button>
+        </div>
+        
+        <div class="info">
+            <p>Load an audio file or use the test tone to see the visualizer in action.</p>
+            <p>The visualizer requires WebGL2 support and user interaction to start audio analysis.</p>
+        </div>
+    </div>
+
+    <script type="module">
+        // This would work when the library is built
+        // import { createVisualizer, simpleSpectrum } from './dist/index.js'
+        
+        // For now, we'll create a placeholder implementation
+        let visualizer = null;
+        let audioContext = null;
+        
+        window.startVisualizer = function() {
+            const canvas = document.getElementById('visualizer-canvas');
+            const audio = document.getElementById('audio-player');
+            
+            console.log('Starting visualizer...');
+            
+            // Create a simple WebGL context for demonstration
+            const gl = canvas.getContext('webgl2');
+            if (!gl) {
+                alert('WebGL2 is not supported in your browser');
+                return;
+            }
+            
+            // Set up audio context
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            console.log('Visualizer setup complete');
+            alert('Visualizer library is ready! Build the project to see the full implementation.');
+        }
+        
+        window.stopVisualizer = function() {
+            console.log('Stopping visualizer...');
+        }
+        
+        window.generateTestTone = function() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            // Generate a simple test tone
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4 note
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.5); // Play for 0.5 seconds
+        }
+    </script>
+</body>
+</html>
