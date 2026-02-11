@@ -1,17 +1,17 @@
 export class GLContext {
   public readonly gl: WebGL2RenderingContext
   private canvas: HTMLCanvasElement
-  private extensions: Map<string, any> = new Map()
+  private extensions: Map<string, unknown> = new Map()
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas
-    
+
     const gl = canvas.getContext('webgl2', {
       alpha: true,
       antialias: false,
       depth: false,
       stencil: false,
-      powerPreference: 'high-performance'
+      powerPreference: 'high-performance',
     })
 
     if (!gl) {
@@ -27,12 +27,12 @@ export class GLContext {
     const extensionNames = [
       'EXT_color_buffer_float',
       'OES_texture_float_linear',
-      'EXT_texture_filter_anisotropic'
+      'EXT_texture_filter_anisotropic',
     ]
 
-    extensionNames.forEach(name => {
-      const ext = this.gl.getExtension(name)
-      if (ext) {
+    extensionNames.forEach((name) => {
+      const ext: unknown = this.gl.getExtension(name)
+      if (ext !== null) {
         this.extensions.set(name, ext)
       }
     })
@@ -40,22 +40,22 @@ export class GLContext {
 
   private setupInitialState(): void {
     const gl = this.gl
-    
+
     // Set viewport
     gl.viewport(0, 0, this.canvas.width, this.canvas.height)
-    
+
     // Disable depth testing (2D rendering)
     gl.disable(gl.DEPTH_TEST)
-    
+
     // Enable blending for transparency effects
     gl.enable(gl.BLEND)
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-    
+
     // Clear color
     gl.clearColor(0, 0, 0, 1)
   }
 
-  public getExtension(name: string): any {
+  public getExtension(name: string): unknown {
     return this.extensions.get(name)
   }
 
@@ -78,7 +78,7 @@ export class GLContext {
   }
 
   public getMaxTextureSize(): number {
-    return this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE)
+    return this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE) as number
   }
 
   public destroy(): void {

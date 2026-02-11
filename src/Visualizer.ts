@@ -90,9 +90,9 @@ export class Visualizer {
     this.presetRunner.render(audioData)
   }
 
-  public destroy(): void {
+  public async destroy(): Promise<void> {
     this.renderLoop.stop()
-    this.audioAnalyzer.destroy()
+    await this.audioAnalyzer.destroy()
     this.glContext.destroy()
   }
 }

@@ -4,12 +4,12 @@ A modern Milkdrop-style visualizer engine for the web, built with WebGL2 and Typ
 
 ## Features
 
-- 🎵 **Audio Analysis**: Real-time spectrum and waveform analysis with beat detection
-- 🎨 **WebGL2 Rendering**: High-performance GPU-accelerated visualizations
-- 🔄 **Community Presets**: Support for custom shader-based presets
-- 🎛️ **Vue.js Integration**: Easy integration with Vue.js applications
-- 📱 **Responsive**: Automatic canvas resizing and aspect ratio handling
-- 🎯 **TypeScript**: Full type safety and IntelliSense support
+- **Audio Analysis**: Real-time spectrum and waveform analysis with beat detection
+- **WebGL2 Rendering**: High-performance GPU-accelerated visualizations
+- **Community Presets**: Support for custom shader-based presets
+- **Vue.js Integration**: Easy integration with Vue.js applications
+- **Responsive**: Automatic canvas resizing and aspect ratio handling
+- **TypeScript**: Full type safety and IntelliSense support
 
 ## Installation
 
@@ -42,18 +42,9 @@ visualizer.start()
 ### Vue.js Integration
 
 ```vue
-<template>
-  <div>
-    <canvas ref="canvas" width="800" height="600"></canvas>
-    <audio ref="audio" controls>
-      <source src="your-audio-file.mp3" type="audio/mpeg">
-    </audio>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
 import { createVisualizer, simpleSpectrum } from 'hypercream'
+import { onMounted, onUnmounted, ref } from 'vue'
 
 const canvas = ref<HTMLCanvasElement>()
 const audio = ref<HTMLAudioElement>()
@@ -61,18 +52,14 @@ let visualizer: any = null
 
 onMounted(() => {
   if (canvas.value && audio.value) {
-    // Create visualizer
     visualizer = createVisualizer({
       canvas: canvas.value
     })
-    
-    // Connect audio
+
     visualizer.connectAudio(audio.value)
-    
-    // Load a preset
+
     visualizer.loadPreset(simpleSpectrum)
-    
-    // Start visualization
+
     visualizer.start()
   }
 })
@@ -83,6 +70,15 @@ onUnmounted(() => {
   }
 })
 </script>
+
+<template>
+  <div>
+    <canvas ref="canvas" width="800" height="600"></canvas>
+    <audio ref="audio" controls>
+      <source src="your-audio-file.mp3" type="audio/mpeg">
+    </audio>
+  </div>
+</template>
 ```
 
 ## Creating Custom Presets
@@ -101,22 +97,22 @@ const myPreset = PresetBuilder.create()
   .setShaders({
     fragment: `#version 300 es
       precision highp float;
-      
+
       in vec2 v_texCoord;
       out vec4 fragColor;
-      
+
       uniform float u_time;
       uniform vec2 u_resolution;
       uniform float u_energy;
       uniform sampler2D u_spectrum;
-      
+
       void main() {
         vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-        
+
         // Your shader code here
         vec3 color = vec3(uv.x, uv.y, sin(u_time) * 0.5 + 0.5);
         color *= u_energy;
-        
+
         fragColor = vec4(color, 1.0);
       }
     `
@@ -172,10 +168,10 @@ class Visualizer {
 
 ```typescript
 interface VisualizerConfig {
-  canvas?: HTMLCanvasElement  // Canvas element (creates one if not provided)
-  width?: number             // Canvas width (default: 800)
-  height?: number            // Canvas height (default: 600)
-  audioElement?: HTMLAudioElement  // Audio element to connect immediately
+  canvas?: HTMLCanvasElement // Canvas element (creates one if not provided)
+  width?: number // Canvas width (default: 800)
+  height?: number // Canvas height (default: 600)
+  audioElement?: HTMLAudioElement // Audio element to connect immediately
 }
 ```
 

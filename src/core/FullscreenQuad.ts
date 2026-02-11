@@ -5,20 +5,24 @@ export class FullscreenQuad {
 
   constructor(gl: WebGL2RenderingContext) {
     this.gl = gl
-    
+
     // Create vertex array object
-    const vao = gl.createVertexArray()
-    if (!vao) {
+    try {
+      const vao = gl.createVertexArray()
+      this.vao = vao
+    }
+    catch {
       throw new Error('Failed to create vertex array object')
     }
-    this.vao = vao
 
     // Create vertex buffer
-    const vertexBuffer = gl.createBuffer()
-    if (!vertexBuffer) {
+    try {
+      const vertexBuffer = gl.createBuffer()
+      this.vertexBuffer = vertexBuffer
+    }
+    catch {
       throw new Error('Failed to create vertex buffer')
     }
-    this.vertexBuffer = vertexBuffer
 
     this.setupGeometry()
   }
@@ -30,14 +34,32 @@ export class FullscreenQuad {
     // Two triangles forming a quad that covers the entire screen
     const vertices = new Float32Array([
       // Triangle 1
-      -1, -1, 0, 0,  // Bottom-left
-       1, -1, 1, 0,  // Bottom-right
-      -1,  1, 0, 1,  // Top-left
-      
+      -1,
+      -1,
+      0,
+      0, // Bottom-left
+      1,
+      -1,
+      1,
+      0, // Bottom-right
+      -1,
+      1,
+      0,
+      1, // Top-left
+
       // Triangle 2
-      -1,  1, 0, 1,  // Top-left
-       1, -1, 1, 0,  // Bottom-right
-       1,  1, 1, 1   // Top-right
+      -1,
+      1,
+      0,
+      1, // Top-left
+      1,
+      -1,
+      1,
+      0, // Bottom-right
+      1,
+      1,
+      1,
+      1, // Top-right
     ])
 
     gl.bindVertexArray(this.vao)

@@ -3,54 +3,15 @@
 Here's a complete example showing how to use HyperCream in a Vue.js application:
 
 ```vue
-<template>
-  <div class="visualizer-container">
-    <canvas 
-      ref="visualizerCanvas" 
-      :width="canvasSize.width" 
-      :height="canvasSize.height"
-      class="visualizer-canvas"
-    />
-    
-    <div class="controls">
-      <audio 
-        ref="audioElement" 
-        controls 
-        @loadeddata="onAudioLoaded"
-        @play="startVisualizer"
-        @pause="stopVisualizer"
-      >
-        <source src="/path/to/your/audio.mp3" type="audio/mpeg">
-      </audio>
-      
-      <div class="preset-controls">
-        <button 
-          v-for="preset in availablePresets" 
-          :key="preset.id"
-          @click="loadPreset(preset)"
-          :class="{ active: currentPreset === preset.id }"
-        >
-          {{ preset.name }}
-        </button>
-      </div>
-      
-      <div class="size-controls">
-        <button @click="setSize(800, 600)">800x600</button>
-        <button @click="setSize(1024, 768)">1024x768</button>
-        <button @click="setSize(1920, 1080)">1920x1080</button>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, reactive } from 'vue'
-import { 
-  createVisualizer, 
-  simpleSpectrum,
-  type Visualizer,
-  PresetBuilder 
+import type { Visualizer } from 'hypercream'
+import {
+  createVisualizer,
+  PresetBuilder,
+  simpleSpectrum
+
 } from 'hypercream'
+import { onMounted, onUnmounted, reactive, ref } from 'vue'
 
 // Reactive state
 const visualizerCanvas = ref<HTMLCanvasElement>()
@@ -77,39 +38,39 @@ const waveformPreset = PresetBuilder.create()
   .setShaders({
     fragment: `#version 300 es
       precision highp float;
-      
+
       in vec2 v_texCoord;
       out vec4 fragColor;
-      
+
       uniform float u_time;
       uniform vec2 u_resolution;
       uniform float u_energy;
       uniform sampler2D u_waveform;
-      
+
       void main() {
         vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-        
+
         // Sample waveform at current x position
         float waveValue = texture(u_waveform, vec2(uv.x, 0.5)).r;
-        
+
         // Convert from 0-1 to -1 to 1 range
         waveValue = (waveValue - 0.5) * 2.0;
-        
+
         // Scale by energy
         waveValue *= u_energy * 2.0;
-        
+
         // Create waveform line
         float centerY = 0.5;
         float waveY = centerY + waveValue * 0.4;
         float lineThickness = 0.01;
-        
+
         float distance = abs(uv.y - waveY);
         float line = 1.0 - smoothstep(0.0, lineThickness, distance);
-        
+
         // Color based on position and energy
         vec3 color = vec3(uv.x, 1.0 - uv.x, u_energy);
         color *= line;
-        
+
         fragColor = vec4(color, 1.0);
       }
     `
@@ -125,8 +86,9 @@ availablePresets.value.push({
 
 // Setup visualizer
 onMounted(async () => {
-  if (!visualizerCanvas.value) return
-  
+  if (!visualizerCanvas.value)
+    return
+
   try {
     // Create visualizer instance
     visualizer = createVisualizer({
@@ -134,15 +96,16 @@ onMounted(async () => {
       width: canvasSize.width,
       height: canvasSize.height
     })
-    
+
     // Load default preset
     const defaultPreset = availablePresets.value.find(p => p.id === currentPreset.value)
     if (defaultPreset) {
       visualizer.loadPreset(defaultPreset.preset)
     }
-    
+
     console.log('Visualizer initialized successfully')
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Failed to initialize visualizer:', error)
   }
 })
@@ -156,19 +119,20 @@ onUnmounted(() => {
 })
 
 // Audio loaded handler
-const onAudioLoaded = () => {
+function onAudioLoaded() {
   if (visualizer && audioElement.value) {
     try {
       visualizer.connectAudio(audioElement.value)
       console.log('Audio connected to visualizer')
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Failed to connect audio:', error)
     }
   }
 }
 
 // Start visualizer
-const startVisualizer = () => {
+function startVisualizer() {
   if (visualizer) {
     visualizer.start()
     console.log('Visualizer started')
@@ -176,7 +140,7 @@ const startVisualizer = () => {
 }
 
 // Stop visualizer
-const stopVisualizer = () => {
+function stopVisualizer() {
   if (visualizer) {
     visualizer.stop()
     console.log('Visualizer stopped')
@@ -184,7 +148,7 @@ const stopVisualizer = () => {
 }
 
 // Load preset
-const loadPreset = (presetInfo: typeof availablePresets.value[0]) => {
+function loadPreset(presetInfo: typeof availablePresets.value[0]) {
   if (visualizer) {
     visualizer.loadPreset(presetInfo.preset)
     currentPreset.value = presetInfo.id
@@ -193,16 +157,62 @@ const loadPreset = (presetInfo: typeof availablePresets.value[0]) => {
 }
 
 // Set canvas size
-const setSize = (width: number, height: number) => {
+function setSize(width: number, height: number) {
   canvasSize.width = width
   canvasSize.height = height
-  
+
   if (visualizer) {
     visualizer.resize(width, height)
     console.log(`Canvas resized to ${width}x${height}`)
   }
 }
 </script>
+
+<template>
+  <div class="visualizer-container">
+    <canvas
+      ref="visualizerCanvas"
+      :width="canvasSize.width"
+      :height="canvasSize.height"
+      class="visualizer-canvas"
+    />
+
+    <div class="controls">
+      <audio
+        ref="audioElement"
+        controls
+        @loadeddata="onAudioLoaded"
+        @play="startVisualizer"
+        @pause="stopVisualizer"
+      >
+        <source src="/path/to/your/audio.mp3" type="audio/mpeg">
+      </audio>
+
+      <div class="preset-controls">
+        <button
+          v-for="preset in availablePresets"
+          :key="preset.id"
+          :class="{ active: currentPreset === preset.id }"
+          @click="loadPreset(preset)"
+        >
+          {{ preset.name }}
+        </button>
+      </div>
+
+      <div class="size-controls">
+        <button @click="setSize(800, 600)">
+          800x600
+        </button>
+        <button @click="setSize(1024, 768)">
+          1024x768
+        </button>
+        <button @click="setSize(1920, 1080)">
+          1920x1080
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .visualizer-container {

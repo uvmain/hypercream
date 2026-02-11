@@ -1,21 +1,24 @@
-import { Preset, PresetBuilder } from './Preset'
+import type { Preset } from './Preset'
+import { PresetBuilder } from './Preset'
 
 export class PresetLoader {
   private loadedPresets: Map<string, Preset> = new Map()
 
-  public async loadFromJSON(data: any): Promise<Preset> {
+  public async loadFromJSON(data: Preset): Promise<Preset> {
     try {
       const preset = PresetBuilder.create()
         .setMetadata(data.metadata)
         .setShaders(data.shaders)
-        
+
       if (data.uniforms) {
         preset.setUniforms(data.uniforms)
       }
-      
+
       return preset.build()
-    } catch (error) {
-      throw new Error(`Failed to load preset from JSON: ${error}`)
+    }
+    catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      throw new Error(`Failed to load preset from JSON: ${errorMessage}`)
     }
   }
 
@@ -25,25 +28,27 @@ export class PresetLoader {
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
-      
-      const data = await response.json()
-      return this.loadFromJSON(data)
-    } catch (error) {
-      throw new Error(`Failed to load preset from URL ${url}: ${error}`)
+
+      const data = await response.json() as Preset
+      return await this.loadFromJSON(data)
+    }
+    catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      throw new Error(`Failed to load preset from URL ${url}: ${errorMessage}`)
     }
   }
 
   public createBuiltinPreset(name: string, fragmentShader: string): Preset {
     return PresetBuilder.create()
       .setMetadata({
-        name: name,
+        name,
         author: 'HyperCream',
         description: `Built-in ${name} preset`,
         version: '1.0.0',
-        tags: ['builtin']
+        tags: ['builtin'],
       })
       .setShaders({
-        fragment: fragmentShader
+        fragment: fragmentShader,
       })
       .build()
   }

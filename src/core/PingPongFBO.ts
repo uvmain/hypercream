@@ -19,18 +19,18 @@ export class PingPongFBO {
     this.gl = gl
     this.width = options.width
     this.height = options.height
-    
-    const format = options.format || gl.RGBA
-    const type = options.type || gl.UNSIGNED_BYTE
-    const filter = options.filter || gl.LINEAR
-    const wrap = options.wrap || gl.CLAMP_TO_EDGE
+
+    const format = options.format ?? gl.RGBA
+    const type = options.type ?? gl.UNSIGNED_BYTE
+    const filter = options.filter ?? gl.LINEAR
+    const wrap = options.wrap ?? gl.CLAMP_TO_EDGE
 
     // Create two framebuffers for ping-pong rendering
     for (let i = 0; i < 2; i++) {
       const fbo = gl.createFramebuffer()
       const texture = gl.createTexture()
 
-      if (!fbo || !texture) {
+      if (fbo === null || texture === null) {
         throw new Error('Failed to create framebuffer or texture')
       }
 
@@ -114,22 +114,22 @@ export class PingPongFBO {
 
   public clear(r = 0, g = 0, b = 0, a = 1): void {
     const gl = this.gl
-    
+
     for (const fbo of this.fbos) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, fbo)
       gl.clearColor(r, g, b, a)
       gl.clear(gl.COLOR_BUFFER_BIT)
     }
-    
+
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
   }
 
   public destroy(): void {
     const gl = this.gl
-    
+
     this.fbos.forEach(fbo => gl.deleteFramebuffer(fbo))
     this.textures.forEach(texture => gl.deleteTexture(texture))
-    
+
     this.fbos = []
     this.textures = []
   }

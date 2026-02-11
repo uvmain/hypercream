@@ -25,7 +25,7 @@ export class RenderLoop {
 
   public stop(): void {
     this.isRunning = false
-    
+
     if (this.animationId !== null) {
       cancelAnimationFrame(this.animationId)
       this.animationId = null
@@ -50,7 +50,7 @@ export class RenderLoop {
       const fps = this.frameCount / (deltaTime / 1000)
       this.frameCount = 0
       this.lastTime = currentTime
-      
+
       if (this.fpsCallback) {
         this.fpsCallback(fps)
       }
@@ -59,7 +59,8 @@ export class RenderLoop {
     // Execute the render callback
     try {
       this.callback()
-    } catch (error) {
+    }
+    catch (error) {
       console.error('Render callback error:', error)
     }
 

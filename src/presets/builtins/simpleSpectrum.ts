@@ -6,7 +6,7 @@ export const simpleSpectrum = PresetBuilder.create()
     author: 'HyperCream',
     description: 'A basic circular spectrum visualizer',
     version: '1.0.0',
-    tags: ['builtin', 'spectrum', 'circular']
+    tags: ['builtin', 'spectrum', 'circular'],
   })
   .setShaders({
     fragment: `#version 300 es
@@ -67,6 +67,6 @@ export const simpleSpectrum = PresetBuilder.create()
         
         fragColor = vec4(color, 1.0);
       }
-    `
+    `,
   })
   .build()

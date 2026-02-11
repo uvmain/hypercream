@@ -27,7 +27,7 @@ export interface Preset {
   metadata: PresetMetadata
   shaders: PresetShaders
   uniforms?: PresetUniforms
-  
+
   // Optional initialization and update functions
   init?: (gl: WebGL2RenderingContext) => void
   update?: (audioData: any, time: number, frame: number) => void
@@ -71,7 +71,7 @@ export class PresetBuilder {
     if (!this.preset.metadata) {
       throw new Error('Preset metadata is required')
     }
-    
+
     if (!this.preset.shaders) {
       throw new Error('Preset shaders are required')
     }

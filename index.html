@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HyperCream Visualizer Example</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #000;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        #visualizer-canvas {
+            border: 1px solid #333;
+            display: block;
+            margin: 20px auto;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .audio-url-section {
+            background: #111;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border: 1px solid #333;
+        }
+        
+        .audio-url-section h3 {
+            margin-top: 0;
+            color: #fff;
+        }
+        
+        .url-input-group {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #audio-url-input {
+            flex: 1;
+            min-width: 300px;
+            padding: 10px 15px;
+            background: #222;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        #audio-url-input:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 5px rgba(0, 102, 204, 0.3);
+        }
+        
+        .sample-urls {
+            margin-top: 15px;
+        }
+        
+        .sample-urls p {
+            margin: 10px 0 5px 0;
+            font-size: 14px;
+            color: #ccc;
+        }
+        
+        .sample-urls button {
+            margin: 5px;
+            padding: 8px 15px;
+            background: #0066cc;
+            font-size: 13px;
+        }
+        
+        .sample-urls button:hover {
+            background: #0080ff;
+        }
+        
+        .url-help {
+            margin-top: 15px;
+            text-align: left;
+            background: #0a0a0a;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #444;
+        }
+        
+        .url-help p {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #fff;
+        }
+        
+        .url-help ul {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 13px;
+            color: #ccc;
+        }
+        
+        .url-help li {
+            margin: 5px 0;
+        }
+        
+        audio {
+            margin: 10px;
+        }
+        
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #555;
+        }
+        
+        .info {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>HyperCream Visualizer</h1>
+        
+        <canvas id="visualizer-canvas" width="800" height="600"></canvas>
+        
+        <div class="controls">
+            <div class="audio-url-section">
+                <h3>Load Audio from URL</h3>
+                <div class="url-input-group">
+                    <input 
+                        type="url" 
+                        id="audio-url-input" 
+                        placeholder="Enter a valid audio file URL (must support CORS)"
+                        value=""
+                    >
+                    <button onclick="loadAudioFromUrl()">Load Audio</button>
+                </div>
+                <div class="url-help">
+                    <p><strong>Requirements:</strong></p>
+                    <ul>
+                        <li>Audio file must be publicly accessible</li>
+                        <li>Server must allow CORS (Cross-Origin Resource Sharing)</li>
+                        <li>Supported formats: MP3, WAV, OGG, M4A</li>
+                        <li>Try hosting your own audio files or use CORS-enabled services</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <audio id="audio-player" controls crossorigin="anonymous">
+                Your browser does not support the audio element.
+            </audio>
+            <br>
+            <button onclick="startVisualizer()">Start Visualizer</button>
+            <button onclick="stopVisualizer()">Stop Visualizer</button>
+        </div>
+        
+        <div class="info">
+            <p><strong>🎵 HyperCream Visualizer is ready!</strong></p>
+            <p>1. Enter a valid audio file URL in the input field above</p>
+            <p>2. Click "Load Audio" to load your audio file</p>
+            <p>3. Click "Start Visualizer" to initialize the WebGL visualizer</p>
+            <p>4. Press play on the audio player to start the music and see the visualization</p>
+            <p><strong>Important:</strong> Due to browser security, audio files must be hosted on servers that support CORS.</p>
+            <p>For testing, consider uploading audio files to services like GitHub Pages, Netlify, or your own web server with CORS enabled.</p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the built HyperCream library
+        import { createVisualizer, simpleSpectrum } from './dist/index.js'
+        
+        let visualizer = null;
+        let audioContext = null;
+        
+        window.startVisualizer = async function() {
+            const canvas = document.getElementById('visualizer-canvas');
+            const audio = document.getElementById('audio-player');
+            
+            console.log('Starting visualizer...');
+            
+            try {
+                // Create visualizer instance
+                visualizer = createVisualizer({
+                    canvas: canvas,
+                    width: 800,
+                    height: 600
+                });
+                
+                // Connect audio element
+                visualizer.connectAudio(audio);
+                
+                // Load the simple spectrum preset
+                visualizer.loadPreset(simpleSpectrum);
+                
+                // Start the visualizer
+                visualizer.start();
+                
+                console.log('Visualizer started successfully!');
+                
+                // Auto-play audio if it's loaded
+                if (audio.readyState >= 2) { // HAVE_CURRENT_DATA
+                    try {
+                        await audio.play();
+                        console.log('Audio playback started');
+                    } catch (e) {
+                        console.log('Auto-play prevented by browser, user must click play manually');
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to start visualizer:', error);
+                alert('Failed to start visualizer: ' + error.message);
+            }
+        }
+        
+        window.stopVisualizer = function() {
+            console.log('Stopping visualizer...');
+            
+            if (visualizer) {
+                visualizer.stop();
+                console.log('Visualizer stopped');
+            }
+            
+            const audio = document.getElementById('audio-player');
+            audio.pause();
+        }
+        
+        window.loadAudioFromUrl = function() {
+            const urlInput = document.getElementById('audio-url-input');
+            const audioPlayer = document.getElementById('audio-player');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                alert('Please enter a valid audio URL');
+                return;
+            }
+            
+            // Validate URL format
+            try {
+                new URL(url);
+            } catch (e) {
+                alert('Please enter a valid URL');
+                return;
+            }
+            
+            console.log('Loading audio from URL:', url);
+            
+            // Stop current audio if playing
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            
+            // Stop visualizer if running
+            if (visualizer) {
+                visualizer.stop();
+            }
+            
+            // Set new source
+            audioPlayer.src = url;
+            
+            // Handle loading events
+            const handleLoadStart = () => {
+                console.log('Started loading audio...');
+            };
+            
+            const handleCanPlay = () => {
+                console.log('Audio loaded and ready to play');
+                // Reconnect to visualizer if it exists
+                if (visualizer) {
+                    visualizer.connectAudio(audioPlayer);
+                    console.log('Audio reconnected to visualizer');
+                }
+            };
+            
+            const handleError = (e) => {
+                console.error('Error loading audio:', e);
+                alert('Failed to load audio from URL. Please check the URL and try again.\n\nNote: The audio file must support CORS for cross-origin requests.');
+            };
+            
+            // Remove any existing event listeners to avoid duplicates
+            audioPlayer.removeEventListener('loadstart', handleLoadStart);
+            audioPlayer.removeEventListener('canplay', handleCanPlay);
+            audioPlayer.removeEventListener('error', handleError);
+            
+            // Add event listeners
+            audioPlayer.addEventListener('loadstart', handleLoadStart);
+            audioPlayer.addEventListener('canplay', handleCanPlay);
+            audioPlayer.addEventListener('error', handleError);
+            
+            // Load the audio
+            audioPlayer.load();
+        }
+        
+        // Handle Enter key in URL input
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlInput = document.getElementById('audio-url-input');
+            urlInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    loadAudioFromUrl();
+                }
+            });
+            
+            // Auto-connect audio when page loads
+            const audio = document.getElementById('audio-player');
+            audio.addEventListener('loadeddata', function() {
+                console.log('Initial audio loaded');
+            });
+        });
+    </script>
+</body>
+</html>
